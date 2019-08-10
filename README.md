@@ -49,7 +49,7 @@ gpio readall
 ### Example
 
 ```js
-var rpi433 = require("rpi-433"),
+var rpi433 = require("rpi-433-v2"),
   rfSniffer = rpi433.sniffer({
     pin: 2, //Snif on GPIO 2 (or Physical PIN 13)
     debounceDelay: 500 //Wait 500ms before reading another code
