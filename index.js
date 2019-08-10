@@ -27,6 +27,7 @@ module.exports = {
    * @param   [options]   Options to configure pin or pulseLength
    *                      options.pin           Pin on which send the code
    *                      options.pulseLength   Pulse length
+   *                      options.protocol      Protocol
    *
    * @return  Function    Function used to send codes
    */
