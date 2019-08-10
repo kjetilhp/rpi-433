@@ -1,54 +1,65 @@
-#include "RCSwitch.h"
+/*
+  RFSniffer
+
+  Usage: ./RFSniffer [<pulseLength>]
+  [] = optional
+
+  Hacked from http://code.google.com/p/rc-switch/
+  by @justy to provide a handy RF code sniffer
+*/
+
+#include "../rc-switch/RCSwitch.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <string>
+     
+     
+RCSwitch mySwitch;
+ 
 
-bool eq(std::string s1, std::string c1, std::string c2) {
-  return s1.compare(c1) == 0 || s1.compare(c2) == 0;
-}
 
 int main(int argc, char *argv[]) {
   
-  //Programm Options
-  struct Options {
-    
-    int PIN;
-    
-    Options():  PIN(2)
-                {};
-    
-  } options;
-  
-  //If not available, exit
-  if(wiringPiSetup() == -1) {
-    return 0;
-  }
-  
-  //Get options
-  for (int i = 1; i < argc; i++) {
-        
-    if (eq(argv[i], "-p", "--pin") && argc > i+1) {
-      options.PIN = atoi(argv[i+1]);
-    }
-    
-  }
+     // This pin is not the first pin on the RPi GPIO header!
+     // Consult https://projects.drogon.net/raspberry-pi/wiringpi/pins/
+     // for more information.
+     int pin = 2;
      
-  RCSwitch mySwitch = RCSwitch();
-  mySwitch.enableReceive(options.PIN);
+     if(wiringPiSetup() == -1) {
+       printf("wiringPiSetup failed, exiting...");
+       return 0;
+     }
 
-  while(1) {
+     int pulseLength = 0;
+     if (argv[1] != NULL) pulseLength = atoi(argv[1]);
+     if (argv[2] != NULL) pin = atoi(argv[2]);
 
-    if (mySwitch.available()) {
+     mySwitch = RCSwitch();
+     if (pulseLength != 0) mySwitch.setPulseLength(pulseLength);
+     mySwitch.enableReceive(pin);  // Receiver on interrupt 0 => that is pin #2
+     
+    
+     while(1) {
+  
+      if (mySwitch.available()) {
+    
+        int value = mySwitch.getReceivedValue();
+    
+        if (value == 0) {
+          printf("Unknown encoding\n");
+        } else {    
+   
+          printf("Received %i\n", mySwitch.getReceivedValue() );
+        }
+    
+        mySwitch.resetAvailable();
+    
+      }
       
-      printf("{\"code\": %i, \"pulseLength\": %i}", mySwitch.getReceivedValue(), mySwitch.getReceivedDelay());
-
-      fflush(stdout);
-      mySwitch.resetAvailable();
-
-    }
-
+  
   }
 
-  return 0;
+  exit(0);
+
 
 }
+

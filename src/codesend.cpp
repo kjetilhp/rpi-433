@@ -1,64 +1,61 @@
-/**
- * https://github.com/ninjablocks/433Utils
- *
- * PIN Schemas : https://projects.drogon.net/raspberry-pi/wiringpi/pins/
- */
+/*
+Usage: ./codesend decimalcode [protocol] [pulselength]
+decimalcode - As decoded by RFSniffer
+protocol    - According to rc-switch definitions
+pulselength - pulselength in microseconds
+
+ 'codesend' hacked from 'send' by @justy
+ 
+ - The provided rc_switch 'send' command uses the form systemCode, unitCode, command
+   which is not suitable for our purposes.  Instead, we call 
+   send(code, length); // where length is always 24 and code is simply the code
+   we find using the RF_sniffer.ino Arduino sketch.
+
+(Use RF_Sniffer.ino to check that RF signals are being produced by the RPi's transmitter 
+or your remote control)
+*/
 #include "RCSwitch.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <string>
-
-bool eq(std::string s1, std::string c1, std::string c2) {
-  return s1.compare(c1) == 0 || s1.compare(c2) == 0;
-}
+     
 
 int main(int argc, char *argv[]) {
-  
-  //Programm Options
-  struct Options {
     
-    int PIN;
-    int CODE;
-    int PULSE_LENGTH;
+    // This pin is not the first pin on the RPi GPIO header!
+    // Consult https://projects.drogon.net/raspberry-pi/wiringpi/pins/
+    // for more information.
+    int pin = 0;
     
-    Options():  PIN(0),
-                CODE(0),
-                PULSE_LENGTH(350)
-                {};
-    
-  } options;
+    // Parse the first parameter to this command as an integer
+    int protocol = 0; // A value of 0 will use rc-switch's default value
+    int pulseLength = 0;
 
-  //If not available, exit
-  if(wiringPiSetup() == -1) {
+    // If no command line argument is given, print the help text
+    if (argc == 1) {
+        printf("Usage: %s decimalcode [protocol] [pulselength]\n", argv[0]);
+        printf("decimalcode\t- As decoded by RFSniffer\n");
+        printf("protocol\t- According to rc-switch definitions\n");
+        printf("pulselength\t- pulselength in microseconds\n");
+        printf("pin\t- pin in wiringpi\n");
+        return -1;
+    }
+
+    // Change protocol and pulse length accroding to parameters
+    int code = atoi(argv[1]);
+    if (argc >= 3) protocol = atoi(argv[2]);
+    if (argc >= 4) pulseLength = atoi(argv[3]);
+    if (argc >= 5) pin = atoi(argv[4]);
+    
+    if (wiringPiSetup () == -1) return 1;
+    printf("sending code[%i]\n", code);
+    RCSwitch mySwitch = RCSwitch();
+    if (protocol != 0) mySwitch.setProtocol(protocol);
+    if (pulseLength != 0) mySwitch.setPulseLength(pulseLength);
+    mySwitch.setProtocol(4);
+    mySwitch.enableTransmit(pin);
+    
+    mySwitch.send(code, 24);
+    
     return 0;
-  }
-  
-  //Get options
-  for (int i = 1; i < argc; i++) {
-        
-    if (eq(argv[i], "-p", "--pin") && argc > i+1) {
-      options.PIN = atoi(argv[i+1]);
-    }
-    
-    if (eq(argv[i], "-c", "--code") && argc > i+1) {
-      options.CODE = atoi(argv[i+1]);
-    }
-    
-    if (eq(argv[i], "-pl", "--pulse-length") && argc > i+1) {
-      options.PULSE_LENGTH = atoi(argv[i+1]);
-    }
-    
-  }
-
-  
-  //Send the code
-  RCSwitch mySwitch = RCSwitch();
-  mySwitch.enableTransmit(options.PIN);
-  mySwitch.setPulseLength(options.PULSE_LENGTH);
-  mySwitch.send(options.CODE, 24);
-  
-  printf("code: %i, pin: %i, pulseLength: %i\n", options.CODE, options.PIN, options.PULSE_LENGTH);
-
-  return 0;
 
 }
