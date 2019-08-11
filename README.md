@@ -9,6 +9,11 @@
 For my projects I needed to set the protocol. This was not possible in the original version, https://nodei.co/npm/rpi-433/
 So all credits go to eroak.
 
+### Modifications to the original
+
+- Protocol can be set
+- Updated the scripts (codesend and RFSniffer) to the latest
+
 Simple NodeJS module to send and receive decimal codes through 433Mhz device on RaspberryPI 2
 
 ### Dependencies
