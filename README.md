@@ -1,13 +1,4 @@
-# rpi-433-v2
-
-[![npm version](https://badge.fury.io/js/rpi-433-v2.svg)](http://badge.fury.io/js/rpi-433)
-
-[![NPM](https://nodei.co/npm/rpi-433-v2.png?downloads=true)](https://nodei.co/npm/rpi-433-v2/)
-
-### Credits
-
-For my projects I needed to set the protocol. This was not possible in the original version, https://nodei.co/npm/rpi-433/
-So all credits go to eroak.
+# rpi-433
 
 ### Modifications to the original
 
@@ -67,9 +58,7 @@ var rpi433 = require("rpi-433-v2"),
 
 // Receive (data is like {code: xxx, pulseLength: xxx})
 rfSniffer.on("data", function(data) {
-  console.log(
-    "Code received: " + data.code + " pulse length : " + data.pulseLength
-  );
+  console.log('Code received: ' + data.code + ' Protocol: ' + data.protocol + ' Delay: ' + data.delay)
 });
 
 // Send
