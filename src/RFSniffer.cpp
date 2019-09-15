@@ -11,11 +11,13 @@
 #include "RCSwitch.h"
 #include <stdlib.h>
 #include <stdio.h>
-     
+#include <iostream>
+#include <unistd.h> // usleep
+#include <string.h> // strcmp
+
+using namespace std;
      
 RCSwitch mySwitch;
- 
-
 
 int main(int argc, char *argv[]) {
   
@@ -37,7 +39,6 @@ int main(int argc, char *argv[]) {
      if (pulseLength != 0) mySwitch.setPulseLength(pulseLength);
      mySwitch.enableReceive(pin);  // Receiver on interrupt 0 => that is pin #2
      
-    
      while(1) {
   
       if (mySwitch.available()) {
@@ -47,19 +48,20 @@ int main(int argc, char *argv[]) {
         if (value == 0) {
           printf("Unknown encoding\n");
         } else {    
-   
-          printf("Received %i\n", mySwitch.getReceivedValue() );
+          cout << "{\"code\":";
+          cout << mySwitch.getReceivedValue();
+          cout << ",\"bit\":";
+          cout << mySwitch.getReceivedBitlength();
+          cout << ",\"protocol\":";
+          cout << mySwitch.getReceivedProtocol();
+          cout << ",\"delay\":";
+          cout << mySwitch.getReceivedDelay();
+          cout << "}" << endl;
         }
-    
+        fflush(stdout);
         mySwitch.resetAvailable();
-    
       }
-      
-  
   }
-
   exit(0);
-
-
 }
 
